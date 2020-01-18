@@ -10,7 +10,7 @@ import wx
 from sys import exit, stdout
 import re
 from typing import Tuple, List
-# from ssdrapiclient import SsdrApiClientFactory
+from ssdrapiclient import SsdrApiClientFactory
 from vitaprotocol import VitaProtocol
 from ssdrframe import SsdrFdvClientFrame
 
@@ -66,21 +66,21 @@ class ssdrclient:
 
 #  XXX TODO: Need to create a discovery client to find the radio
 if __name__ == '__main__':
-    client = ssdrclient(addr='10.0.3.50', port=4992)
-    client.subscribe_meters([
-        'fdv-snr',
-        'fdv-foff',
-        'fdv-total-bits',
-        'fdv-error-bits',
-        'fdv-ber'
-    ])
+    # client = ssdrclient(addr='10.0.3.50', port=4992)
+    # client.subscribe_meters([
+    #     'fdv-snr',
+    #     'fdv-foff',
+    #     'fdv-total-bits',
+    #     'fdv-error-bits',
+    #     'fdv-ber'
+    # ])
 
     vitaSocket = reactor.listenUDP(0, VitaProtocol('10.0.3.50', 4993))
     vitaPort = vitaSocket.getHost().port
 
-    client.send_command('client udpport {}'.format(vitaSocket.getHost().port))
+    # client.send_command('client udpport {}'.format(vitaSocket.getHost().port))
 
-    # reactor.connectTCP('10.0.3.50', 4992, SsdrApiClientFactory(vitaPort))
+    reactor.connectTCP('10.0.3.50', 4992, SsdrApiClientFactory(vitaPort))
 
     app = wx.App(False)
     reactor.registerWxApp(app)

@@ -3,112 +3,94 @@ import re
 from twisted.internet.defer import inlineCallbacks, returnValue, Deferred
 from twisted.internet.protocol import ClientFactory
 from twisted.protocols.basic import LineOnlyReceiver
+from pexpect.fdpexpect import fdspawn
+from sys import stdout
+from typing import Tuple, List, Optional
 
 
 class SsdrApiProtocol(LineOnlyReceiver):
     delimiter = b'\n'
 
-    def __init__(self, vitaPort):
+    def __init__(self, vita_port: int) -> None:
         self.minor_version = 0.0
         self.major_version = 0.0
         self.handle = 0x00
         self.sequence = 0
-        self.pending_replies = dict()
-        self.vita_port = vitaPort
-        self.meters = dict()
+        self.vita_port = vita_port
+        self.meters = {}
+        self.major_rev = 0
+        self.minor_rev = 0
+        self.handle = None
+        self.expect = None
+        self.freedv_slice = None
+        self.slices = {}
 
-    def meter_list_response(self, code, message):
-        if int(code) != 0:
-            print('Response is error, ignoring')
-            return
-
-        meter_attr_re = re.compile('(\d+)\.(.+)=(.+)')
-
-        for meter_attr in message.split('#'):
-            match = meter_attr_re.match(meter_attr)
-            if match:
-                (meterId, attrName, value) = match.groups()
-                if meterId not in self.meters:
-                    self.meters.update({meterId : {attrName: value}})
-                else:
-                    self.meters[meterId].update({attrName: value})
-
-    @inlineCallbacks
-    def load_meters(self):
-        (code, message) = yield self.send_command('meter list')
-
-        if int(code) != 0:
-            print('Response is error, ignoring')
-            return
-
-        meter_attr_re = re.compile('(\d+)\.(.+)=(.+)')
-
-        for meterAttr in message.split('#'):
-            match = meter_attr_re.match(meterAttr)
-            if match:
-                (meterId, attrName, value) = match.groups()
-                if meterId not in self.meters:
-                    self.meters.update({meterId : {attrName: value}})
-                else:
-                    self.meters[meterId].update({attrName: value})
-
-    @inlineCallbacks
-    def find_meter_by_name(self, name):
-        if len(self.meters) == 0:
-            yield self.load_meters()
-
-        returnValue([(meterId, entry) for (meterId, entry) in self.meters.items() if name in entry['nam']][0])
-
-    @inlineCallbacks
-    def subscribe_meter(self, name):
-        (meterId, meterAttrs) = yield self.find_meter_by_name(name)
-        # self.sendCommand('sub meter all')
-        self.send_command('sub meter {}'.format(meterId))
-
-    @inlineCallbacks
-    def connectionMade(self):
-        self.send_command('client udpport {}'.format(self.vita_port))
-        yield self.subscribe_meter('fdv-snr')
-        yield self.subscribe_meter('fdv-foff')
-        yield self.subscribe_meter('fdv-total-bits')
-        yield self.subscribe_meter('fdv-error-bits')
-        yield self.subscribe_meter('fdv-ber')
-
-    def send_command(self, command, callback=None):  # XXX Change Signature Here
-        deferred = Deferred()
-
-        self.pending_replies[self.sequence] = deferred
-        line = 'C{}|{}'.format(self.sequence, command).encode()
-        self.sendLine(line)
-        print("Sending: {}".format(line))
+    def send_command(self, command: str, wait: bool = True) -> Optional[Tuple[int, str]]:
+        self.expect.sendline('C{}|{}'.format(self.sequence, command))
+        matcher = 'R{}\|([0-9A-Z]{{0,8}})\|(.*)\n'.format(self.sequence)
         self.sequence = self.sequence + 1
 
-        return deferred
+        if wait:
+            self.expect.expect(matcher)
+            return int(self.expect.match.group(1)), self.expect.match.group(2)
+        else:
+            return None
 
-    def version_received(self, line):
-        match = re.fullmatch('V(\d+\.\d+)\.(\d+\.\d+)', line)
-        if match:
-            (self.major_version, self.minor_version) = match.groups()
+    def load_meters(self) -> None:
+        meter_attr_re = re.compile('(\d+)\.nam=([^#]+)')
 
-    def handle_received(self, line):
-        match = re.fullmatch('H([0-9A-Z]{8})', line)
-        if match:
-            self.handle = int(match.group(1), 16)
+        (code, message) = self.send_command('meter list')
+        if code != 0:
+            return None  # XXX Exception
+        for match in meter_attr_re.finditer(message):
+            print("Meter {} is #{}".format(match.group(2), match.group(1)))
+            self.meters[match.group(2)] = match.group(1)
+
+    def subscribe_meters(self, meters: List[str]) -> None:
+        if len(self.meters) == 0:
+            self.load_meters()
+
+        for meter in meters:
+            (code, message) = self.send_command('sub meter {}'.format(self.meters[meter]))
+            if code != 0:
+                print("Error subscribing meter {}({})".format(meter, self.meters[meter]))
+
+    def connectionMade(self) -> None:
+        self.expect = fdspawn(self.transport.getHandle().fileno(), timeout=10, encoding="utf-8", logfile=stdout)
+        self.expect.expect('V(\d+\.\d+)\.(\d+\.\d+)\n')
+        self.major_rev = self.expect.match.group(1)
+        self.minor_rev = self.expect.match.group(2)
+        print('Radio is Version {}/{}'.format(self.major_rev, self.minor_rev))
+
+        self.expect.expect('H([0-9A-F]{8})\n')
+        self.handle = self.expect.match.group(1)
+        print('Our handle is {}'.format(self.handle))
+
+        self.send_command('client udpport {}'.format(self.vita_port), wait=False)
+        self.subscribe_meters([
+            "fdv-snr",
+            "fdv-foff",
+            "fdv-total-bits",
+            "fdv-error-bits",
+            "fdv-ber"
+        ])
+
+        self.send_command('sub slice all', wait=False)
 
     def command_received(self, line):
         pass
 
-    def reply_received(self, line):
-        (sequence, code, message) = line.split('|')
-        sequence = int(sequence[1][-1])
-        print('Got reply with sequence {}, code {} and message "{}"'.format(sequence, code, message))
-        if sequence in self.pending_replies:
-            deferred = self.pending_replies[sequence]
-            deferred.callback((code, message))
- #           self.pendingReplies[sequence](code, message)
-
     def status_received(self, line):
-        print("Status Message: {}".format(line))
+        line = line.split('|')[1]
+        tokens = line.split()
+        if tokens[0] == 'slice':
+            sliceno = tokens[1]
+            if sliceno not in self.slices:
+                self.slices[sliceno] = {}
+            for token in tokens[2:]:
+                (name, value) = token.split('=')
+                self.slices[sliceno][name] = value
+
 
     def message_received(selfs, line):
         pass
@@ -116,13 +98,13 @@ class SsdrApiProtocol(LineOnlyReceiver):
     def lineReceived(self, line):
         line = line.decode('utf-8')
         if line[0] == 'V':
-            self.version_received(line)
+            pass
         elif line[0] == 'H':
-            self.handle_received(line)
+            pass
         elif line[0] == 'C':
             self.command_received(line)
         elif line[0] == 'R':
-            self.reply_received(line)
+            pass
         elif line[0] == 'S':
             self.status_received(line)
         elif line[0] == 'M':
