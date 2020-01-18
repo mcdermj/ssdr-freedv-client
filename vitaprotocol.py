@@ -1,10 +1,10 @@
 import struct
-
 from twisted.internet.protocol import DatagramProtocol
 
+
 class VitaProtocol(DatagramProtocol):
-    __headerFormat = '!BBHIQIQ'
-    __headerSize = struct.calcsize(__headerFormat)
+    __header_format = '!BBHIQIQ'
+    __header_size = struct.calcsize(__header_format)
 
     def __init__(self, host, port):
         self.host = host
@@ -13,46 +13,47 @@ class VitaProtocol(DatagramProtocol):
     def startProtocol(self):
         self.transport.connect(self.host, self.port)
 
-    def parseVitaHeader(self, packet):
-        (packetType, timeStampType, length, streamId, classId, timeStampInt, timeStampFrac) = struct.unpack(self.__headerFormat, packet[0:self.__headerSize])
+    def parse_vita_header(self, packet):
+        (packet_type, time_stamp_type, length, stream_id, class_id, time_stamp_int, time_stamp_frac) = \
+            struct.unpack(self.__header_format, packet[0:self.__header_size])
 
         header = {
-            'packetType': packetType,
-            'timestampType': timeStampType,
+            'packetType': packet_type,
+            'timestampType': time_stamp_type,
             'length': length,
-            'streamId': streamId,
-            'classId': classId,
-            'timeStampInt': timeStampInt,
-            'timeStampFrac': timeStampFrac,
+            'streamId': stream_id,
+            'classId': class_id,
+            'timeStampInt': time_stamp_int,
+            'timeStampFrac': time_stamp_frac,
         }
 
         return header
 
-    def parseMeterData(self, packet):
-        meterData = dict()
+    def parse_meter_data(self, packet):
+        meter_data = dict()
 
-        for (meterId, meterValue) in struct.iter_unpack('!hh', packet[self.__headerSize:]):
-            meterValue = meterValue / (1 << 6)
-            meterData[meterId] = meterValue
-            print("ID: {}, Value: {}".format(meterId, meterValue))
+        for (meterId, meter_value) in struct.iter_unpack('!hh', packet[self.__header_size:]):
+            meter_value = meter_value / (1 << 6)
+            meter_data[meterId] = meter_value
+            print("ID: {}, Value: {}".format(meterId, meter_value))
 
-        return meterData
+        return meter_data
 
-    def receivedUnknownPacket(self):
+    def received_unknown_packet(self):
         pass
 
-    def receivedMeters(self, meterData):
-        for (meterId, meterValue) in meterData.items():
+    def received_meters(self, meter_data):
+        for (meterId, meterValue) in meter_data.items():
             print("Id: {}, Value: {}".format(meterId, meterValue))
 
     def datagramReceived(self, datagram, addr):
-        header = self.parseVitaHeader(datagram)
+        header = self.parse_vita_header(datagram)
 
         if header['classId'] >> 32 != 0x00001c2d:
             print("This is not a flex packet, ignoring")
             return
 
         if header['classId'] == 0x00001c2d534c8002 and header['streamId'] == 0x00000700:
-            self.receivedMeters(self.parseMeterData(datagram))
+            self.received_meters(self.parse_meter_data(datagram))
         else:
-            self.receivedUnknownPacket()
+            self.received_unknown_packet()

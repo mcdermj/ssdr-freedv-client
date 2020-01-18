@@ -9,23 +9,23 @@ class SsdrApiProtocol(LineOnlyReceiver):
     delimiter = b'\n'
 
     def __init__(self, vitaPort):
-        self.minorVersion = 0.0
-        self.majorVersion = 0.0
+        self.minor_version = 0.0
+        self.major_version = 0.0
         self.handle = 0x00
         self.sequence = 0
-        self.pendingReplies = dict()
-        self.vitaPort = vitaPort
+        self.pending_replies = dict()
+        self.vita_port = vitaPort
         self.meters = dict()
 
-    def meterListResponse(self, code, message):
+    def meter_list_response(self, code, message):
         if int(code) != 0:
             print('Response is error, ignoring')
             return
 
-        meterAttrRe = re.compile('(\d+)\.(.+)=(.+)')
+        meter_attr_re = re.compile('(\d+)\.(.+)=(.+)')
 
-        for meterAttr in message.split('#'):
-            match = meterAttrRe.match(meterAttr)
+        for meter_attr in message.split('#'):
+            match = meter_attr_re.match(meter_attr)
             if match:
                 (meterId, attrName, value) = match.groups()
                 if meterId not in self.meters:
@@ -34,17 +34,17 @@ class SsdrApiProtocol(LineOnlyReceiver):
                     self.meters[meterId].update({attrName: value})
 
     @inlineCallbacks
-    def loadMeters(self):
-        (code, message) = yield self.sendCommand('meter list')
+    def load_meters(self):
+        (code, message) = yield self.send_command('meter list')
 
         if int(code) != 0:
             print('Response is error, ignoring')
             return
 
-        meterAttrRe = re.compile('(\d+)\.(.+)=(.+)')
+        meter_attr_re = re.compile('(\d+)\.(.+)=(.+)')
 
         for meterAttr in message.split('#'):
-            match = meterAttrRe.match(meterAttr)
+            match = meter_attr_re.match(meterAttr)
             if match:
                 (meterId, attrName, value) = match.groups()
                 if meterId not in self.meters:
@@ -53,32 +53,31 @@ class SsdrApiProtocol(LineOnlyReceiver):
                     self.meters[meterId].update({attrName: value})
 
     @inlineCallbacks
-    def findMeterByName(self, name):
+    def find_meter_by_name(self, name):
         if len(self.meters) == 0:
-            yield self.loadMeters()
+            yield self.load_meters()
 
         returnValue([(meterId, entry) for (meterId, entry) in self.meters.items() if name in entry['nam']][0])
 
     @inlineCallbacks
-    def subscribeMeter(self, name):
-        (meterId, meterAttrs) = yield self.findMeterByName(name)
+    def subscribe_meter(self, name):
+        (meterId, meterAttrs) = yield self.find_meter_by_name(name)
         # self.sendCommand('sub meter all')
-        self.sendCommand('sub meter {}'.format(meterId))
+        self.send_command('sub meter {}'.format(meterId))
 
     @inlineCallbacks
     def connectionMade(self):
-        self.sendCommand('client udpport {}'.format(self.vitaPort))
-        yield self.subscribeMeter('fdv-snr')
-        yield self.subscribeMeter('fdv-foff')
-        yield self.subscribeMeter('fdv-total-bits')
-        yield self.subscribeMeter('fdv-error-bits')
-        yield self.subscribeMeter('fdv-ber')
+        self.send_command('client udpport {}'.format(self.vita_port))
+        yield self.subscribe_meter('fdv-snr')
+        yield self.subscribe_meter('fdv-foff')
+        yield self.subscribe_meter('fdv-total-bits')
+        yield self.subscribe_meter('fdv-error-bits')
+        yield self.subscribe_meter('fdv-ber')
 
-
-    def sendCommand(self, command, callback=None):  # XXX Change Signature Here
+    def send_command(self, command, callback=None):  # XXX Change Signature Here
         deferred = Deferred()
 
-        self.pendingReplies[self.sequence] = deferred
+        self.pending_replies[self.sequence] = deferred
         line = 'C{}|{}'.format(self.sequence, command).encode()
         self.sendLine(line)
         print("Sending: {}".format(line))
@@ -86,62 +85,62 @@ class SsdrApiProtocol(LineOnlyReceiver):
 
         return deferred
 
-    def versionReceived(self, line):
+    def version_received(self, line):
         match = re.fullmatch('V(\d+\.\d+)\.(\d+\.\d+)', line)
         if match:
-            (self.majorVersion, self.minorVersion) = match.groups()
+            (self.major_version, self.minor_version) = match.groups()
 
-    def handleReceived(self, line):
+    def handle_received(self, line):
         match = re.fullmatch('H([0-9A-Z]{8})', line)
         if match:
             self.handle = int(match.group(1), 16)
 
-    def commandReceived(self, line):
+    def command_received(self, line):
         pass
 
-    def replyReceived(self, line):
+    def reply_received(self, line):
         (sequence, code, message) = line.split('|')
         sequence = int(sequence[1][-1])
         print('Got reply with sequence {}, code {} and message "{}"'.format(sequence, code, message))
-        if sequence in self.pendingReplies:
-            deferred = self.pendingReplies[sequence]
+        if sequence in self.pending_replies:
+            deferred = self.pending_replies[sequence]
             deferred.callback((code, message))
  #           self.pendingReplies[sequence](code, message)
 
-    def statusReceived(self, line):
+    def status_received(self, line):
         print("Status Message: {}".format(line))
 
-    def messageReceived(selfs, line):
+    def message_received(selfs, line):
         pass
 
     def lineReceived(self, line):
         line = line.decode('utf-8')
         if line[0] == 'V':
-            self.versionReceived(line)
+            self.version_received(line)
         elif line[0] == 'H':
-            self.handleReceived(line)
+            self.handle_received(line)
         elif line[0] == 'C':
-            self.commandReceived(line)
+            self.command_received(line)
         elif line[0] == 'R':
-            self.replyReceived(line)
+            self.reply_received(line)
         elif line[0] == 'S':
-            self.statusReceived(line)
+            self.status_received(line)
         elif line[0] == 'M':
-            self.messageReceived(line)
+            self.message_received(line)
         else:
             print('Invalid command: {}', line)
 
 
 class SsdrApiClientFactory(ClientFactory):
-    def __init__(self, vitaPort):
-        self.vitaPort = vitaPort
+    def __init__(self, vita_port):
+        self.vita_port = vita_port
 
     def startedConnecting(self, connector):
         print('Started to connect.')
 
     def buildProtocol(self, addr):
         print('Connected.')
-        return SsdrApiProtocol(self.vitaPort)
+        return SsdrApiProtocol(self.vita_port)
 
     def clientConnectionLost(self, connector, reason):
         print('Lost connection.  Reason:', reason)
