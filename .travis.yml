@@ -1,0 +1,8 @@
+os: windows
+language: shell
+before_install:
+  - choco install python --version 3.7.x
+  - python -m pip install --upgrade pip 3.7.6
+  - pip install pyinstaller
+scirpt:
+  - pyinstaller --one-file --windowed ssdr-client.py
