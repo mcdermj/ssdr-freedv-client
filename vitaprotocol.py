@@ -1,14 +1,16 @@
 import struct
 from twisted.internet.protocol import DatagramProtocol
+from ssdrapiclient import SsdrApiProtocol
 
 
 class VitaProtocol(DatagramProtocol):
     __header_format = '!BBHIQIQ'
     __header_size = struct.calcsize(__header_format)
 
-    def __init__(self, host, port):
+    def __init__(self, host: int, port: int, api: SsdrApiProtocol) -> None:
         self.host = host
         self.port = port
+        self.api = api
 
     def startProtocol(self):
         self.transport.connect(self.host, self.port)
@@ -33,18 +35,16 @@ class VitaProtocol(DatagramProtocol):
         meter_data = dict()
 
         for (meterId, meter_value) in struct.iter_unpack('!hh', packet[self.__header_size:]):
-            meter_value = meter_value / (1 << 6)
             meter_data[meterId] = meter_value
-            print("ID: {}, Value: {}".format(meterId, meter_value))
-
         return meter_data
 
     def received_unknown_packet(self):
         pass
 
     def received_meters(self, meter_data):
-        for (meterId, meterValue) in meter_data.items():
-            print("Id: {}, Value: {}".format(meterId, meterValue))
+        for (meter_id, meter_value) in meter_data.items():
+            self.api.update_meter(meter_id, meter_value)
+        self.api.frame.Layout()
 
     def datagramReceived(self, datagram, addr):
         header = self.parse_vita_header(datagram)

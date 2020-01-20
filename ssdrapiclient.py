@@ -1,22 +1,22 @@
 import re
-
-from twisted.internet.defer import inlineCallbacks, returnValue, Deferred
 from twisted.internet.protocol import ClientFactory
 from twisted.protocols.basic import LineOnlyReceiver
 from pexpect.fdpexpect import fdspawn
 from sys import stdout
 from typing import Tuple, List, Optional
+from twisted.internet import reactor
+from ssdrframe import SsdrFdvClientFrame
 
 
 class SsdrApiProtocol(LineOnlyReceiver):
     delimiter = b'\n'
 
-    def __init__(self, vita_port: int) -> None:
+    def __init__(self, frame: SsdrFdvClientFrame) -> None:
         self.minor_version = 0.0
         self.major_version = 0.0
         self.handle = 0x00
         self.sequence = 0
-        self.vita_port = vita_port
+        self.vita_port = 0
         self.meters = {}
         self.major_rev = 0
         self.minor_rev = 0
@@ -24,6 +24,17 @@ class SsdrApiProtocol(LineOnlyReceiver):
         self.expect = None
         self.freedv_slice = None
         self.slices = {}
+        self.vita_socket = None
+        self.frame = frame
+
+        frame.set_mode_handler(self.mode_handler)
+
+    def mode_handler(self, event):
+        mode = event.GetString()
+        print("Change mode to {}".format(mode))
+        for (slcno, slc) in self.slices.items():
+            if slc['mode'].startswith('FDV'):
+                self.send_command("slice waveform_cmd {} fdv-set-mode={}".format(slcno, mode), wait=False)
 
     def send_command(self, command: str, wait: bool = True) -> Optional[Tuple[int, str]]:
         self.expect.sendline('C{}|{}'.format(self.sequence, command))
@@ -43,8 +54,7 @@ class SsdrApiProtocol(LineOnlyReceiver):
         if code != 0:
             return None  # XXX Exception
         for match in meter_attr_re.finditer(message):
-            print("Meter {} is #{}".format(match.group(2), match.group(1)))
-            self.meters[match.group(2)] = match.group(1)
+            self.meters[match.group(2)] = int(match.group(1))
 
     def subscribe_meters(self, meters: List[str]) -> None:
         if len(self.meters) == 0:
@@ -55,7 +65,26 @@ class SsdrApiProtocol(LineOnlyReceiver):
             if code != 0:
                 print("Error subscribing meter {}({})".format(meter, self.meters[meter]))
 
+    def update_meter(self, meter_id: int, meter_value: int):
+        for (k, v) in self.meters.items():
+            if v == meter_id:
+                method_name = k.replace('-', '_')
+                if method_name.startswith('fdv_'):
+                    method_name = method_name[4:]
+                if hasattr(self.frame, method_name):
+                    setattr(self.frame, method_name, meter_value)
+
+    def update_settings(self):
+        for (slcno, slc) in self.slices.items():
+            if slc['mode'].startswith('FDV') and 'fdv-mode' in slc:
+                self.frame.mode = slc['fdv-mode']
+
     def connectionMade(self) -> None:
+        from vitaprotocol import VitaProtocol
+
+        self.vita_socket = reactor.listenUDP(0, VitaProtocol(self.transport.getPeer().host, 4993, self))
+        self.vita_port = self.vita_socket.getHost().port
+
         self.expect = fdspawn(self.transport.getHandle().fileno(), timeout=10, encoding="utf-8", logfile=stdout)
         self.expect.expect('V(\d+\.\d+)\.(\d+\.\d+)\n')
         self.major_rev = self.expect.match.group(1)
@@ -70,9 +99,12 @@ class SsdrApiProtocol(LineOnlyReceiver):
         self.subscribe_meters([
             "fdv-snr",
             "fdv-foff",
-            "fdv-total-bits",
+            "fdv-total-bits-lsb",
+            "fdv-total-bits-msb",
             "fdv-error-bits",
-            "fdv-ber"
+            "fdv-ber",
+            "fdv-clock-offset",
+            "fdv-sync-quality"
         ])
 
         self.send_command('sub slice all', wait=False)
@@ -88,11 +120,15 @@ class SsdrApiProtocol(LineOnlyReceiver):
             if sliceno not in self.slices:
                 self.slices[sliceno] = {}
             for token in tokens[2:]:
-                (name, value) = token.split('=')
-                self.slices[sliceno][name] = value
+                try:
+                    (name, value) = token.split('=')
+                except ValueError:
+                    self.slices[sliceno][token] = ''
+                else:
+                    self.slices[sliceno][name] = value
+            self.update_settings()
 
-
-    def message_received(selfs, line):
+    def message_received(self, line):
         pass
 
     def lineReceived(self, line):
@@ -114,16 +150,15 @@ class SsdrApiProtocol(LineOnlyReceiver):
 
 
 class SsdrApiClientFactory(ClientFactory):
-    def __init__(self, vita_port):
-        self.vita_port = vita_port
+    def __init__(self, frame: SsdrFdvClientFrame):
+        self.frame = frame
 
     def startedConnecting(self, connector):
         print('Started to connect.')
 
     def buildProtocol(self, addr):
         print('Connected.')
-        return SsdrApiProtocol(self.vita_port)
-
+        return SsdrApiProtocol(self.frame)
     def clientConnectionLost(self, connector, reason):
         print('Lost connection.  Reason:', reason)
 

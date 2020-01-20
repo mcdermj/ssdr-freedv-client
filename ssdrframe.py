@@ -1,97 +1,250 @@
 import wx
+from typing import Callable
+
 
 class SsdrFdvClientFrame (wx.Frame):
     def __init__(self):
-        super().__init__(None, wx.ID_ANY, "SmartSDR FreeDV Waveform Control")
+        wx.Frame.__init__(self, None, id=wx.ID_ANY, title=u"SmartSDR FreeDV Waveform Control", pos=wx.DefaultPosition,
+                          size=wx.Size(250, 500),
+                          style=wx.CLOSE_BOX | wx.DEFAULT_FRAME_STYLE | wx.FRAME_NO_TASKBAR | wx.TAB_TRAVERSAL)
 
-        self.SetSizeHints(wx.DefaultSize, wx.DefaultSize)
-        self.SetForegroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOWTEXT))
-        self.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DLIGHT))
-        # this->SetSizeHints(wxDefaultSize, wxDefaultSize);
-        # this->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        # this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DLIGHT));
-        # this->SetSizeHints(wxDefaultSize, wxDefaultSize);
-        # this->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        # this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DLIGHT));
+        self.SetSizeHints(wx.Size(250, 500), wx.Size(250, 500))
 
-        self.box_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.snr_sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, 'SNR'), wx.VERTICAL)
-        self.gauge_snr = wx.Gauge(self, wx.ID_ANY, 25, wx.DefaultPosition, wx.Size(15, 135), wx.GA_SMOOTH | wx.GA_VERTICAL)
-        self.gauge_snr.SetToolTip('Displays signal to noise ratio in dB.')
-        self.snr_sizer.Add(self.gauge_snr, 1, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 10)
+        bSizer4 = wx.BoxSizer(wx.VERTICAL)
 
-        self.text_snr = wx.StaticText(self, wx.ID_ANY, ' 0.0', wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER)
-        self.snr_sizer.Add(self.text_snr, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
+        sbSizer4 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"SNR"), wx.VERTICAL)
 
-        self.checkbox_snr = wx.CheckBox(self, wx.ID_ANY, "Slow", wx.DefaultPosition, wx.DefaultSize, wx.CHK_2STATE)
-        self.checkbox_snr.SetToolTip('Smooth but slow SNR estimation')
-        self.snr_sizer.Add(self.checkbox_snr, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+        self.gauge_snr = wx.Gauge(sbSizer4.GetStaticBox(), wx.ID_ANY, 25, wx.DefaultPosition, wx.Size(15, 135),
+                                  wx.GA_SMOOTH | wx.GA_VERTICAL)
+        self.gauge_snr.SetValue(0)
+        self.gauge_snr.SetMinSize(wx.Size(15, 135))
+        self.gauge_snr.SetMaxSize(wx.Size(15, 135))
 
-        self.box_sizer.Add(self.snr_sizer, 2, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND, 1)
+        sbSizer4.Add(self.gauge_snr, 1, wx.ALL | wx.FIXED_MINSIZE | wx.ALIGN_CENTER_HORIZONTAL, 5)
 
-        self.sbsizer3_33 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Sync"), wx.VERTICAL)
-        self.text_sync = wx.StaticText(self, wx.ID_ANY, "Modem", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER)
-        self.sbsizer3_33.Add(self.text_sync, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
+        self.text_snr = wx.StaticText(sbSizer4.GetStaticBox(), wx.ID_ANY, u"SNR", wx.DefaultPosition, wx.DefaultSize,
+                                      wx.ALIGN_CENTER_HORIZONTAL | wx.ST_NO_AUTORESIZE)
+        self.text_snr.Wrap(-1)
 
-        self.text_interleaver_sync = wx.StaticText(self, wx.ID_ANY, "Interleaver", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER)
-        self.sbsizer3_33.Add(self.text_interleaver_sync, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-        self.text_sync.Disable()
+        sbSizer4.Add(self.text_snr, 0, wx.ALIGN_BOTTOM | wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 5)
 
-        self.btn_resync = wx.Button(self, wx.ID_ANY, "ReSync", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER)
-        self.sbsizer3_33.Add(self.btn_resync, 0, wx.ALIGN_CENTER, 1)
-        self.text_interleaver_sync.Disable()
+        bSizer4.Add(sbSizer4, 1, wx.ALL | wx.EXPAND, 5)
 
-        self.box_sizer.Add(self.sbsizer3_33, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL | wx.EXPAND, 3)
+        sbSizer5 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"Stats"), wx.VERTICAL)
 
-        self.ber_sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, 'Stats'), wx.VERTICAL)
-        self.btn_ber_reset = wx.Button(self, wx.ID_ANY, "Reset", wx.DefaultPosition, wx.DefaultSize, 0)
-        self.ber_sizer.Add(self.btn_ber_reset, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL | wx.ALL, 1)
+        bSizer5 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.text_bits = wx.StaticText(self, wx.ID_ANY, 'Bits: 0', wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_LEFT)
-        self.ber_sizer.Add(self.text_bits, 0, wx.ALIGN_LEFT, 1)
+        self.m_staticText2 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"Bits:", wx.DefaultPosition,
+                                           wx.DefaultSize, wx.ALIGN_LEFT)
+        self.m_staticText2.Wrap(-1)
 
-        self.text_errors = wx.StaticText(self, wx.ID_ANY, 'Errs: 0', wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_LEFT)
-        self.ber_sizer.Add(self.text_errors, 0, wx.ALIGN_LEFT, 1)
+        bSizer5.Add(self.m_staticText2, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_ber = wx.StaticText(self, wx.ID_ANY, 'BER: 0', wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_LEFT)
-        self.ber_sizer.Add(self.text_ber, 0, wx.ALIGN_LEFT, 1)
+        self.text_bits = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+                                       wx.DefaultSize, wx.ALIGN_RIGHT)
+        self.text_bits.Wrap(-1)
 
-        self.text_resyncs = wx.StaticText(self, wx.ID_ANY, 'Resyncs: 0', wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_LEFT)
-        self.ber_sizer.Add(self.text_resyncs, 0, wx.ALIGN_LEFT, 1)
+        bSizer5.Add(self.text_bits, 1, wx.BOTTOM, 5)
 
-        self.text_clkoff = wx.StaticText(self, wx.ID_ANY, 'ClkOff: 0', wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_LEFT)
-        self.ber_sizer.Add(self.text_clkoff, 0, wx.ALIGN_LEFT, 1)
+        sbSizer5.Add(bSizer5, 1, wx.EXPAND, 5)
 
-        self.text_freqoff = wx.StaticText(self, wx.ID_ANY, 'FreqOff: 0', wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_LEFT)
-        self.ber_sizer.Add(self.text_freqoff, 0, wx.ALIGN_LEFT, 1)
+        bSizer6 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.text_sync_metric = wx.StaticText(self, wx.ID_ANY, 'Sync: 0', wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_LEFT)
-        self.ber_sizer.Add(self.text_sync_metric, 0, wx.ALIGN_LEFT, 1)
+        self.m_staticText4 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"Errors:", wx.DefaultPosition,
+                                           wx.DefaultSize, wx.ALIGN_LEFT)
+        self.m_staticText4.Wrap(-1)
 
-        self.text_codec2_var = wx.StaticText(self, wx.ID_ANY, 'Var: 0', wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_LEFT)
-        self.ber_sizer.Add(self.text_codec2_var, 0, wx.ALIGN_LEFT, 1)
+        bSizer6.Add(self.m_staticText4, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.box_sizer.Add(self.ber_sizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL | wx.EXPAND, 3)
+        self.text_errors = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+                                         wx.DefaultSize, wx.ALIGN_RIGHT)
+        self.text_errors.Wrap(-1)
 
-        self.level_sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Level"), wx.VERTICAL)
+        bSizer6.Add(self.text_errors, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
 
-        self.text_level = wx.StaticText(self, wx.ID_ANY, "", wx.DefaultPosition, wx.Size(60, -1), wx.ALIGN_CENTER)
-        self.text_level.SetForegroundColour(wx.Colour(255, 0, 0))
-        self.level_sizer.Add(self.text_level, 0, wx.ALIGN_LEFT, 1)
+        sbSizer5.Add(bSizer6, 1, wx.EXPAND, 5)
 
-        self.gauge_level = wx.Gauge(self, wx.ID_ANY, 100, wx.DefaultPosition, wx.Size(15, 135), wx.GA_SMOOTH | wx.GA_VERTICAL)
-        self.gauge_level.SetToolTip('Peak of From Radio in Rx, or peak of From Mic in Tx mode.  If Red you should reduce your levels')
-        self.level_sizer.Add(self.gauge_level, 1, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 10);
+        bSizer7 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.box_sizer.Add(self.level_sizer, 2, wx.ALIGN_CENTER | wx.ALL | wx.EXPAND, 1)
+        self.m_staticText6 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"BER", wx.DefaultPosition,
+                                           wx.DefaultSize, wx.ALIGN_LEFT)
+        self.m_staticText6.Wrap(-1)
 
+        bSizer7.Add(self.m_staticText6, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.SetSizer(self.box_sizer)
+        self.text_ber = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+                                      wx.DefaultSize, wx.ALIGN_RIGHT)
+        self.text_ber.Wrap(-1)
+
+        bSizer7.Add(self.text_ber, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
+
+        sbSizer5.Add(bSizer7, 1, wx.EXPAND, 5)
+
+        bSizer8 = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.m_staticText8 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"Clock Offset", wx.DefaultPosition,
+                                           wx.DefaultSize, wx.ALIGN_LEFT)
+        self.m_staticText8.Wrap(-1)
+
+        bSizer8.Add(self.m_staticText8, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
+
+        self.text_clkoff = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+                                         wx.DefaultSize, wx.ALIGN_RIGHT)
+        self.text_clkoff.Wrap(-1)
+
+        bSizer8.Add(self.text_clkoff, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
+
+        sbSizer5.Add(bSizer8, 1, wx.EXPAND, 5)
+
+        bSizer9 = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.m_staticText10 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"Frequency Offset:",
+                                            wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_LEFT)
+        self.m_staticText10.Wrap(-1)
+
+        bSizer9.Add(self.m_staticText10, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
+
+        self.text_freqoff = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+                                          wx.DefaultSize, wx.ALIGN_RIGHT)
+        self.text_freqoff.Wrap(-1)
+
+        bSizer9.Add(self.text_freqoff, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
+
+        sbSizer5.Add(bSizer9, 1, wx.EXPAND, 5)
+
+        bSizer10 = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.m_staticText12 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"Sync:", wx.DefaultPosition,
+                                            wx.DefaultSize, wx.ALIGN_LEFT)
+        self.m_staticText12.Wrap(-1)
+
+        bSizer10.Add(self.m_staticText12, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
+
+        self.text_sync_metric = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+                                              wx.DefaultSize, wx.ALIGN_RIGHT)
+        self.text_sync_metric.Wrap(-1)
+
+        bSizer10.Add(self.text_sync_metric, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
+
+        sbSizer5.Add(bSizer10, 1, wx.EXPAND, 5)
+
+        bSizer4.Add(sbSizer5, 0, wx.EXPAND | wx.ALL, 5)
+
+        sbSizer6 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"Control"), wx.VERTICAL)
+
+        bSizer11 = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.m_staticText14 = wx.StaticText(sbSizer6.GetStaticBox(), wx.ID_ANY, u"Mode", wx.DefaultPosition,
+                                            wx.DefaultSize, 0)
+        self.m_staticText14.Wrap(-1)
+
+        bSizer11.Add(self.m_staticText14, 1, wx.ALIGN_LEFT | wx.ALL | wx.EXPAND, 5)
+
+        mode_selectorChoices = [u"700C", u"700D", u"800XA", u"1600"]
+        self.mode_selector = wx.Choice(sbSizer6.GetStaticBox(), wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
+                                       mode_selectorChoices, 0)
+        self.mode_selector.SetSelection(0)
+        bSizer11.Add(self.mode_selector, 0, wx.ALIGN_RIGHT | wx.ALL | wx.EXPAND, 5)
+
+        sbSizer6.Add(bSizer11, 1, wx.EXPAND, 5)
+
+        bSizer4.Add(sbSizer6, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 5)
+
+        self.SetSizer(bSizer4)
+        self.Layout()
+
+        self.Centre(wx.BOTH)
+
+        self.total_bits = 0
 
     @property
-    def freq_offset(self) -> None:
+    def foff(self) -> str:
         return self.text_freqoff.GetLabelText()
 
-    @freq_offset.setter
-    def freq_offset(self, offset: float) -> None:
-        self.text_freqoff.SetLabelText("FreqOff: {}".format(offset))
+    @foff.setter
+    def foff(self, offset: int) -> None:
+        offset /= 1 << 6
+        self.text_freqoff.SetLabelText("{:.1f}".format(offset))
+        self.text_freqoff.InvalidateBestSize()
+
+    @property
+    def snr(self) -> str:
+        return self.text_snr.GetLabelText()
+
+    @snr.setter
+    def snr(self, snr: float) -> None:
+        snr /= 1 << 6
+        self.text_snr.SetLabel('{:.2f}'.format(snr))
+        self.text_snr.InvalidateBestSize()
+        self.gauge_snr.SetValue(snr)
+
+    @property
+    def mode(self) -> str:
+        return self.mode_selector.GetStringSelection()
+
+    @mode.setter
+    def mode(self, mode: str) -> None:
+        self.mode_selector.SetStringSelection(mode)
+
+    @property
+    def ber(self) -> str:
+        return self.text_ber.GetLabelText()
+
+    @ber.setter
+    def ber(self, ber: int) -> None:
+        ber /= 1 << 6
+        self.text_ber.SetLabel('{:.2f}'.format(ber))
+        self.text_ber.InvalidateBestSize()
+
+    @property
+    def clock_offset(self) -> str:
+        return self.text_clkoff.GetLabelText()
+
+    @clock_offset.setter
+    def clock_offset(self, offset: int) -> None:
+        offset /= 1 << 6
+        self.text_clkoff.SetLabel('{:.2f}'.format(offset))
+        self.text_clkoff.InvalidateBestSize()
+
+    @property
+    def sync_quality(self) -> str:
+        return self.text_sync_metric.GetLabelText()
+
+    @sync_quality.setter
+    def sync_quality(self, quality: int) -> None:
+        quality /= 1 << 6
+        self.text_sync_metric.SetLabel('{:.2f}'.format(quality))
+        self.text_sync_metric.InvalidateBestSize()
+
+    @property
+    def total_bits_msb(self) -> int:
+        return self.text_bits.GetLabelText()
+
+    @total_bits_msb.setter
+    def total_bits_msb(self, bits: int) -> None:
+        self.total_bits = (self.total_bits & 0x0000ffff) + ((bits & 0xffff) << 16)
+        self.text_bits.SetLabel('{}'.format(self.total_bits))
+        self.text_bits.InvalidateBestSize()
+
+    @property
+    def total_bits_lsb(self) -> int:
+        return self.text_bits.GetLabelText()
+
+    @total_bits_lsb.setter
+    def total_bits_lsb(self, bits: int) -> None:
+        self.total_bits = (self.total_bits & 0xffff0000) + (bits & 0xffff)
+        self.text_bits.SetLabel('{}'.format(self.total_bits))
+        self.text_bits.InvalidateBestSize()
+
+    @property
+    def error_bits(self) -> str:
+        return self.text_errors.GetLabelText()
+
+    @error_bits.setter
+    def error_bits(self, bits: int) -> None:
+        bits &= 0xffff
+        self.text_errors.SetLabel('{}'.format(bits))
+        self.text_errors.InvalidateBestSize()
+
+    def set_mode_handler(self, handler: Callable):
+        self.Bind(wx.EVT_CHOICE, handler, self.mode_selector)
