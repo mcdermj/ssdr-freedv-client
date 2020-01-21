@@ -15,9 +15,10 @@ class VitaProtocol(DatagramProtocol):
     def startProtocol(self):
         self.transport.connect(self.host, self.port)
 
-    def parse_vita_header(self, packet):
+    @classmethod
+    def parse_vita_header(cls, packet):
         (packet_type, time_stamp_type, length, stream_id, class_id, time_stamp_int, time_stamp_frac) = \
-            struct.unpack(self.__header_format, packet[0:self.__header_size])
+            struct.unpack(cls.__header_format, packet[0:cls.__header_size])
 
         header = {
             'packetType': packet_type,
@@ -30,6 +31,10 @@ class VitaProtocol(DatagramProtocol):
         }
 
         return header
+
+    @classmethod
+    def parse_vita_payload(cls, packet):
+        return packet[cls.__header_size:]
 
     def parse_meter_data(self, packet):
         meter_data = dict()

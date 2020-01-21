@@ -159,6 +159,7 @@ class SsdrApiClientFactory(ClientFactory):
     def buildProtocol(self, addr):
         print('Connected.')
         return SsdrApiProtocol(self.frame)
+
     def clientConnectionLost(self, connector, reason):
         print('Lost connection.  Reason:', reason)
 
