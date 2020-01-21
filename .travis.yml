@@ -6,4 +6,4 @@ before_install:
   - python -m pip install --upgrade pip
   - pip3 install pyinstaller
 scirpt:
-  - pyinstaller --one-file --windowed ssdr-client.py
+  - pyinstaller --onefile --windowed ssdr-client.py
