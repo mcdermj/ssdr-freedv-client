@@ -22,7 +22,7 @@ class SsdrFdvClientFrame (wx.Frame):
 
         sbSizer4.Add(self.gauge_snr, 1, wx.ALL | wx.FIXED_MINSIZE | wx.ALIGN_CENTER_HORIZONTAL, 5)
 
-        self.text_snr = wx.StaticText(sbSizer4.GetStaticBox(), wx.ID_ANY, u"SNR", wx.DefaultPosition, wx.DefaultSize,
+        self.text_snr = wx.StaticText(sbSizer4.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition, wx.DefaultSize,
                                       wx.ALIGN_CENTER_HORIZONTAL | wx.ST_NO_AUTORESIZE)
         self.text_snr.Wrap(-1)
 
@@ -40,7 +40,7 @@ class SsdrFdvClientFrame (wx.Frame):
 
         bSizer5.Add(self.m_staticText2, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_bits = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+        self.text_bits = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0", wx.DefaultPosition,
                                        wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_bits.Wrap(-1)
 
@@ -56,7 +56,7 @@ class SsdrFdvClientFrame (wx.Frame):
 
         bSizer6.Add(self.m_staticText4, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_errors = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+        self.text_errors = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0", wx.DefaultPosition,
                                          wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_errors.Wrap(-1)
 
@@ -72,7 +72,7 @@ class SsdrFdvClientFrame (wx.Frame):
 
         bSizer7.Add(self.m_staticText6, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_ber = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+        self.text_ber = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition,
                                       wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_ber.Wrap(-1)
 
@@ -88,7 +88,7 @@ class SsdrFdvClientFrame (wx.Frame):
 
         bSizer8.Add(self.m_staticText8, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_clkoff = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+        self.text_clkoff = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition,
                                          wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_clkoff.Wrap(-1)
 
@@ -104,7 +104,7 @@ class SsdrFdvClientFrame (wx.Frame):
 
         bSizer9.Add(self.m_staticText10, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_freqoff = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+        self.text_freqoff = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0.0", wx.DefaultPosition,
                                           wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_freqoff.Wrap(-1)
 
@@ -120,7 +120,7 @@ class SsdrFdvClientFrame (wx.Frame):
 
         bSizer10.Add(self.m_staticText12, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_sync_metric = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"MyLabel", wx.DefaultPosition,
+        self.text_sync_metric = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition,
                                               wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_sync_metric.Wrap(-1)
 
