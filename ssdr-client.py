@@ -28,5 +28,4 @@ if __name__ == '__main__':
 
     reactor.adoptDatagramPort(discovery_socket.fileno(), socket.AF_INET, SsdrDiscoveryClient(frame))
 
-    # reactor.listenUDP(4992, SsdrDiscoveryClient(frame))
     reactor.run()
