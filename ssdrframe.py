@@ -12,23 +12,23 @@ class SsdrFdvClientFrame (wx.Frame):
 
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        sbSizer4 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"SNR"), wx.VERTICAL)
+        self.snr_sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"SNR"), wx.VERTICAL)
 
-        self.gauge_snr = wx.Gauge(sbSizer4.GetStaticBox(), wx.ID_ANY, 25, wx.DefaultPosition, wx.Size(15, 135),
+        self.gauge_snr = wx.Gauge(self.snr_sizer.GetStaticBox(), wx.ID_ANY, 25, wx.DefaultPosition, wx.Size(15, 135),
                                   wx.GA_SMOOTH | wx.GA_VERTICAL)
         self.gauge_snr.SetValue(0)
         self.gauge_snr.SetMinSize(wx.Size(15, 135))
         self.gauge_snr.SetMaxSize(wx.Size(15, 135))
 
-        sbSizer4.Add(self.gauge_snr, 1, wx.ALL | wx.FIXED_MINSIZE | wx.ALIGN_CENTER_HORIZONTAL, 5)
+        self.snr_sizer.Add(self.gauge_snr, 1, wx.ALL | wx.FIXED_MINSIZE | wx.ALIGN_CENTER_HORIZONTAL, 5)
 
-        self.text_snr = wx.StaticText(sbSizer4.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition, wx.DefaultSize,
+        self.text_snr = wx.StaticText(self.snr_sizer.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition, wx.DefaultSize,
                                       wx.ALIGN_CENTER_HORIZONTAL | wx.ST_NO_AUTORESIZE)
         self.text_snr.Wrap(-1)
 
-        sbSizer4.Add(self.text_snr, 0, wx.ALIGN_BOTTOM | wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 5)
+        self.snr_sizer.Add(self.text_snr, 0, wx.ALIGN_BOTTOM | wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 5)
 
-        self.main_sizer.Add(sbSizer4, 1, wx.ALL | wx.EXPAND, 5)
+        self.main_sizer.Add(self.snr_sizer, 1, wx.ALL | wx.EXPAND, 5)
 
         self.stats_sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"Stats"), wx.VERTICAL)
 
@@ -176,6 +176,7 @@ class SsdrFdvClientFrame (wx.Frame):
         snr /= 1 << 6
         self.text_snr.SetLabel('{:.2f}'.format(snr))
         self.text_snr.InvalidateBestSize()
+        self.snr_sizer.Layout()
         self.gauge_snr.SetValue(snr)
 
     @property
