@@ -26,7 +26,7 @@ class SsdrApiProtocol(LineOnlyReceiver):
         self.slices = {}
         self.frame = frame
         self.completion_list = {}
-        self.response_matcher = re.compile(r'R([0-9]+)\|([0-9A-Z]{0,8})\|(.*)')
+        self.response_matcher = re.compile(r'R([0-9]+)\|([0-9A-Z]{0,8})\|?(.*)')
         frame.set_mode_handler(self.mode_handler)
 
     def mode_handler(self, event):
