@@ -12,6 +12,7 @@ from twisted.internet import reactor
 import wx
 from ssdrframe import SsdrFdvClientFrame
 from ssdrdiscovery import SsdrDiscoveryClient
+import socket
 
 if __name__ == '__main__':
     app = wx.App(False)
@@ -20,5 +21,12 @@ if __name__ == '__main__':
     frame = SsdrFdvClientFrame()
     frame.Show(True)
 
-    reactor.listenUDP(4992, SsdrDiscoveryClient(frame))
+    discovery_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    discovery_socket.setblocking(False)
+    discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    discovery_socket.bind(('0.0.0.0', 4992))
+
+    reactor.adoptDatagramPort(discovery_socket.fileno(), socket.AF_INET, SsdrDiscoveryClient(frame))
+
+    # reactor.listenUDP(4992, SsdrDiscoveryClient(frame))
     reactor.run()
