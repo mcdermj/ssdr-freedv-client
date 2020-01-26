@@ -10,7 +10,7 @@ class SsdrFdvClientFrame (wx.Frame):
 
         self.SetSizeHints(wx.Size(250, 500), wx.Size(250, 500))
 
-        bSizer4 = wx.BoxSizer(wx.VERTICAL)
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         sbSizer4 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"SNR"), wx.VERTICAL)
 
@@ -28,107 +28,107 @@ class SsdrFdvClientFrame (wx.Frame):
 
         sbSizer4.Add(self.text_snr, 0, wx.ALIGN_BOTTOM | wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 5)
 
-        bSizer4.Add(sbSizer4, 1, wx.ALL | wx.EXPAND, 5)
+        self.main_sizer.Add(sbSizer4, 1, wx.ALL | wx.EXPAND, 5)
 
-        sbSizer5 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"Stats"), wx.VERTICAL)
+        self.stats_sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"Stats"), wx.VERTICAL)
 
         bSizer5 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.m_staticText2 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"Bits:", wx.DefaultPosition,
+        self.m_staticText2 = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"Bits:", wx.DefaultPosition,
                                            wx.DefaultSize, wx.ALIGN_LEFT)
         self.m_staticText2.Wrap(-1)
 
         bSizer5.Add(self.m_staticText2, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_bits = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0", wx.DefaultPosition,
+        self.text_bits = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"0", wx.DefaultPosition,
                                        wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_bits.Wrap(-1)
 
         bSizer5.Add(self.text_bits, 1, wx.BOTTOM, 5)
 
-        sbSizer5.Add(bSizer5, 1, wx.EXPAND, 5)
+        self.stats_sizer.Add(bSizer5, 1, wx.EXPAND, 5)
 
         bSizer6 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.m_staticText4 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"Errors:", wx.DefaultPosition,
+        self.m_staticText4 = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"Errors:", wx.DefaultPosition,
                                            wx.DefaultSize, wx.ALIGN_LEFT)
         self.m_staticText4.Wrap(-1)
 
         bSizer6.Add(self.m_staticText4, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_errors = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0", wx.DefaultPosition,
+        self.text_errors = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"0", wx.DefaultPosition,
                                          wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_errors.Wrap(-1)
 
         bSizer6.Add(self.text_errors, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
 
-        sbSizer5.Add(bSizer6, 1, wx.EXPAND, 5)
+        self.stats_sizer.Add(bSizer6, 1, wx.EXPAND, 5)
 
         bSizer7 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.m_staticText6 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"BER", wx.DefaultPosition,
+        self.m_staticText6 = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"BER", wx.DefaultPosition,
                                            wx.DefaultSize, wx.ALIGN_LEFT)
         self.m_staticText6.Wrap(-1)
 
         bSizer7.Add(self.m_staticText6, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_ber = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition,
+        self.text_ber = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition,
                                       wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_ber.Wrap(-1)
 
         bSizer7.Add(self.text_ber, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
 
-        sbSizer5.Add(bSizer7, 1, wx.EXPAND, 5)
+        self.stats_sizer.Add(bSizer7, 1, wx.EXPAND, 5)
 
         bSizer8 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.m_staticText8 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"Clock Offset", wx.DefaultPosition,
+        self.m_staticText8 = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"Clock Offset", wx.DefaultPosition,
                                            wx.DefaultSize, wx.ALIGN_LEFT)
         self.m_staticText8.Wrap(-1)
 
         bSizer8.Add(self.m_staticText8, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_clkoff = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition,
+        self.text_clkoff = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition,
                                          wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_clkoff.Wrap(-1)
 
         bSizer8.Add(self.text_clkoff, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
 
-        sbSizer5.Add(bSizer8, 1, wx.EXPAND, 5)
+        self.stats_sizer.Add(bSizer8, 1, wx.EXPAND, 5)
 
         bSizer9 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.m_staticText10 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"Frequency Offset:",
+        self.m_staticText10 = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"Frequency Offset:",
                                             wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_LEFT)
         self.m_staticText10.Wrap(-1)
 
         bSizer9.Add(self.m_staticText10, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_freqoff = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0.0", wx.DefaultPosition,
+        self.text_freqoff = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"0.0", wx.DefaultPosition,
                                           wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_freqoff.Wrap(-1)
 
         bSizer9.Add(self.text_freqoff, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
 
-        sbSizer5.Add(bSizer9, 1, wx.EXPAND, 5)
+        self.stats_sizer.Add(bSizer9, 1, wx.EXPAND, 5)
 
         bSizer10 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.m_staticText12 = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"Sync:", wx.DefaultPosition,
+        self.m_staticText12 = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"Sync:", wx.DefaultPosition,
                                             wx.DefaultSize, wx.ALIGN_LEFT)
         self.m_staticText12.Wrap(-1)
 
         bSizer10.Add(self.m_staticText12, 0, wx.ALIGN_LEFT | wx.BOTTOM, 5)
 
-        self.text_sync_metric = wx.StaticText(sbSizer5.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition,
+        self.text_sync_metric = wx.StaticText(self.stats_sizer.GetStaticBox(), wx.ID_ANY, u"0.00", wx.DefaultPosition,
                                               wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_sync_metric.Wrap(-1)
 
         bSizer10.Add(self.text_sync_metric, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
 
-        sbSizer5.Add(bSizer10, 1, wx.EXPAND, 5)
+        self.stats_sizer.Add(bSizer10, 1, wx.EXPAND, 5)
 
-        bSizer4.Add(sbSizer5, 0, wx.EXPAND | wx.ALL, 5)
+        self.main_sizer.Add(self.stats_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         sbSizer6 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"Control"), wx.VERTICAL)
 
@@ -148,9 +148,9 @@ class SsdrFdvClientFrame (wx.Frame):
 
         sbSizer6.Add(bSizer11, 1, wx.EXPAND, 5)
 
-        bSizer4.Add(sbSizer6, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 5)
+        self.main_sizer.Add(sbSizer6, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 5)
 
-        self.SetSizer(bSizer4)
+        self.SetSizer(self.main_sizer)
         self.Layout()
 
         self.Centre(wx.BOTH)
@@ -165,7 +165,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def foff(self, offset: int) -> None:
         offset /= 1 << 6
         self.text_freqoff.SetLabelText("{:.1f}".format(offset))
-        self.text_freqoff.InvalidateBestSize()
+        # self.text_freqoff.InvalidateBestSize()
 
     @property
     def snr(self) -> str:
@@ -175,7 +175,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def snr(self, snr: float) -> None:
         snr /= 1 << 6
         self.text_snr.SetLabel('{:.2f}'.format(snr))
-        self.text_snr.InvalidateBestSize()
+        # self.text_snr.InvalidateBestSize()
         self.gauge_snr.SetValue(snr)
 
     @property
@@ -194,7 +194,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def ber(self, ber: int) -> None:
         ber /= 1 << 6
         self.text_ber.SetLabel('{:.2f}'.format(ber))
-        self.text_ber.InvalidateBestSize()
+        # self.text_ber.InvalidateBestSize()
 
     @property
     def clock_offset(self) -> str:
@@ -204,7 +204,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def clock_offset(self, offset: int) -> None:
         offset /= 1 << 6
         self.text_clkoff.SetLabel('{:.2f}'.format(offset))
-        self.text_clkoff.InvalidateBestSize()
+        # self.text_clkoff.InvalidateBestSize()
 
     @property
     def sync_quality(self) -> str:
@@ -214,7 +214,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def sync_quality(self, quality: int) -> None:
         quality /= 1 << 6
         self.text_sync_metric.SetLabel('{:.2f}'.format(quality))
-        self.text_sync_metric.InvalidateBestSize()
+        # self.text_sync_metric.InvalidateBestSize()
 
     @property
     def total_bits_msb(self) -> int:
@@ -224,7 +224,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def total_bits_msb(self, bits: int) -> None:
         self.total_bits = (self.total_bits & 0x0000ffff) + ((bits & 0xffff) << 16)
         self.text_bits.SetLabel('{}'.format(self.total_bits))
-        self.text_bits.InvalidateBestSize()
+        # self.text_bits.InvalidateBestSize()
 
     @property
     def total_bits_lsb(self) -> int:
@@ -244,7 +244,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def error_bits(self, bits: int) -> None:
         bits &= 0xffff
         self.text_errors.SetLabel('{}'.format(bits))
-        self.text_errors.InvalidateBestSize()
+        # self.text_errors.InvalidateBestSize()
 
     def set_mode_handler(self, handler: Callable):
         self.Bind(wx.EVT_CHOICE, handler, self.mode_selector)

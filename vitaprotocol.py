@@ -47,9 +47,12 @@ class VitaProtocol(DatagramProtocol):
         pass
 
     def received_meters(self, meter_data):
+        self.api.frame.Freeze()
         for (meter_id, meter_value) in meter_data.items():
             self.api.update_meter(meter_id, meter_value)
-        self.api.frame.Layout()
+        # self.api.frame.Layout()
+        self.api.frame.stats_sizer.Layout()
+        self.api.frame.Thaw()
 
     def datagramReceived(self, datagram, addr):
         header = self.parse_vita_header(datagram)
