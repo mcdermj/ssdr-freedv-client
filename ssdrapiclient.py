@@ -34,7 +34,7 @@ class SsdrApiProtocol(LineOnlyReceiver):
         print("Change mode to {}".format(mode))
         for (slcno, slc) in self.slices.items():
             if slc['mode'].startswith('FDV'):
-                self.send_command("slice waveform_cmd {} fdv-set-mode={}".format(slcno, mode), wait=False)
+                self.send_command("slice waveform_cmd {} fdv-set-mode={}".format(slcno, mode))
 
     def send_command(self, command: str) -> Deferred:
         self.sendLine('C{}|{}'.format(self.sequence, command).encode('utf-8'))
