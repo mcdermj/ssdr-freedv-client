@@ -165,7 +165,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def foff(self, offset: int) -> None:
         offset /= 1 << 6
         self.text_freqoff.SetLabelText("{:.1f}".format(offset))
-        # self.text_freqoff.InvalidateBestSize()
+        self.text_freqoff.InvalidateBestSize()
 
     @property
     def snr(self) -> str:
@@ -175,7 +175,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def snr(self, snr: float) -> None:
         snr /= 1 << 6
         self.text_snr.SetLabel('{:.2f}'.format(snr))
-        # self.text_snr.InvalidateBestSize()
+        self.text_snr.InvalidateBestSize()
         self.gauge_snr.SetValue(snr)
 
     @property
@@ -194,7 +194,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def ber(self, ber: int) -> None:
         ber /= 1 << 6
         self.text_ber.SetLabel('{:.2f}'.format(ber))
-        # self.text_ber.InvalidateBestSize()
+        self.text_ber.InvalidateBestSize()
 
     @property
     def clock_offset(self) -> str:
@@ -204,7 +204,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def clock_offset(self, offset: int) -> None:
         offset /= 1 << 6
         self.text_clkoff.SetLabel('{:.2f}'.format(offset))
-        # self.text_clkoff.InvalidateBestSize()
+        self.text_clkoff.InvalidateBestSize()
 
     @property
     def sync_quality(self) -> str:
@@ -214,7 +214,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def sync_quality(self, quality: int) -> None:
         quality /= 1 << 6
         self.text_sync_metric.SetLabel('{:.2f}'.format(quality))
-        # self.text_sync_metric.InvalidateBestSize()
+        self.text_sync_metric.InvalidateBestSize()
 
     @property
     def total_bits_msb(self) -> int:
@@ -224,7 +224,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def total_bits_msb(self, bits: int) -> None:
         self.total_bits = (self.total_bits & 0x0000ffff) + ((bits & 0xffff) << 16)
         self.text_bits.SetLabel('{}'.format(self.total_bits))
-        # self.text_bits.InvalidateBestSize()
+        self.text_bits.InvalidateBestSize()
 
     @property
     def total_bits_lsb(self) -> int:
@@ -244,7 +244,7 @@ class SsdrFdvClientFrame (wx.Frame):
     def error_bits(self, bits: int) -> None:
         bits &= 0xffff
         self.text_errors.SetLabel('{}'.format(bits))
-        # self.text_errors.InvalidateBestSize()
+        self.text_errors.InvalidateBestSize()
 
     def set_mode_handler(self, handler: Callable):
         self.Bind(wx.EVT_CHOICE, handler, self.mode_selector)

@@ -50,7 +50,6 @@ class VitaProtocol(DatagramProtocol):
         self.api.frame.Freeze()
         for (meter_id, meter_value) in meter_data.items():
             self.api.update_meter(meter_id, meter_value)
-        # self.api.frame.Layout()
         self.api.frame.stats_sizer.Layout()
         self.api.frame.Thaw()
 
