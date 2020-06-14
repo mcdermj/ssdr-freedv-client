@@ -6,12 +6,12 @@ before_install:
   - python -m pip install --upgrade pip
   - pip3 install pyinstaller
 scirpt:
-  - pyinstaller --onefile --windowed ssdr-client.py
+  - pyinstaller --onefile --windowed freedv-client.py
 deploy:
   provider: releases
   api_key:
     secure: "dawFKtxJBU9N99syJj+rbm710aO0YEFwLPMNMGc3EGp5ZgK7+82nWPQR1Iu95oIQgE1+noUE3iVK4mivXkL+r3fQU0kmJXuqrXcaSjrHFssZPuy2dKiq/vSEQIaSLRIx+2tvOcx922EXFqDhhW1D1lGdBWbZdGakFsVMxUsfAjnRkkCL7wwDpW6AjTzcdKnr5fE0XsEEkTZSX0e/4cExSuyMP3STdp7HaKqh26Tt1/8W5lDCoGb1lamRpZ5WG+pVxZIPCWQjoa4j4zlaJF08/7OrDt6M8OJUrrK+w/ybtUiu5r7d1w2LsVG+4oEP/VFY0OMOdiBnktQB/a+2yHsLHUYN7d9FUMqOW+9A7xe3eLqZkkeIrdvCLzViBR6d/u9jAWAozo+r6FkjLZCgtHkbueYr3B52Q1xvvCNCIYVrMbC6V5TLuRJoOZJm9VTdJtCTCDiMR5s9xrWrIrdbE9tH+8BYQIGdvofxQtHUlqELtKKO+97hRI9cmN2y2T9kRrmorjwoxuJgKdPZu+57EbN7JUEPoXS0jrtLKc2iXRJVhDqDUK7ptKVXzWMTfl7/J41zdV1+NWg7Z2Y8xwmlJSJH3wfptHItnpZncAaqTBkliYgbmxgtRLiziplcPBKfd+uEWqTnRHNU02F/JHn9z0L8OdzQY95zeHOoTnDWOiU0/iM="
-  file: ${TRAVIS_BUILD_DIR}/dist/ssdr-client.exe
+  file: ${TRAVIS_BUILD_DIR}/dist/freedv-client.exe
   skip_cleanup: true
   draft: true
   on:
