@@ -140,7 +140,7 @@ class SsdrFdvClientFrame (wx.Frame):
 
         bSizer11.Add(self.m_staticText14, 1, wx.ALIGN_LEFT | wx.ALL | wx.EXPAND, 5)
 
-        mode_selectorChoices = [u"700C", u"700D", u"800XA", u"1600"]
+        mode_selectorChoices = [u"700D", u"1600"]
         self.mode_selector = wx.Choice(sbSizer6.GetStaticBox(), wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
                                        mode_selectorChoices, 0)
         self.mode_selector.SetSelection(0)
