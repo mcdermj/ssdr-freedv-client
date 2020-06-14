@@ -26,7 +26,7 @@ class SsdrFdvClientFrame (wx.Frame):
                                       wx.ALIGN_CENTER_HORIZONTAL | wx.ST_NO_AUTORESIZE)
         self.text_snr.Wrap(-1)
 
-        self.snr_sizer.Add(self.text_snr, 0, wx.ALIGN_BOTTOM | wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 5)
+        self.snr_sizer.Add(self.text_snr, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 5)
 
         self.main_sizer.Add(self.snr_sizer, 1, wx.ALL | wx.EXPAND, 5)
 
@@ -60,7 +60,7 @@ class SsdrFdvClientFrame (wx.Frame):
                                          wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_errors.Wrap(-1)
 
-        bSizer6.Add(self.text_errors, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
+        bSizer6.Add(self.text_errors, 1, wx.BOTTOM, 5)
 
         self.stats_sizer.Add(bSizer6, 1, wx.EXPAND, 5)
 
@@ -76,7 +76,7 @@ class SsdrFdvClientFrame (wx.Frame):
                                       wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_ber.Wrap(-1)
 
-        bSizer7.Add(self.text_ber, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
+        bSizer7.Add(self.text_ber, 1, wx.BOTTOM, 5)
 
         self.stats_sizer.Add(bSizer7, 1, wx.EXPAND, 5)
 
@@ -92,7 +92,7 @@ class SsdrFdvClientFrame (wx.Frame):
                                          wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_clkoff.Wrap(-1)
 
-        bSizer8.Add(self.text_clkoff, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
+        bSizer8.Add(self.text_clkoff, 1, wx.BOTTOM, 5)
 
         self.stats_sizer.Add(bSizer8, 1, wx.EXPAND, 5)
 
@@ -108,7 +108,7 @@ class SsdrFdvClientFrame (wx.Frame):
                                           wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_freqoff.Wrap(-1)
 
-        bSizer9.Add(self.text_freqoff, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
+        bSizer9.Add(self.text_freqoff, 1, wx.BOTTOM, 5)
 
         self.stats_sizer.Add(bSizer9, 1, wx.EXPAND, 5)
 
@@ -124,7 +124,7 @@ class SsdrFdvClientFrame (wx.Frame):
                                               wx.DefaultSize, wx.ALIGN_RIGHT)
         self.text_sync_metric.Wrap(-1)
 
-        bSizer10.Add(self.text_sync_metric, 1, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
+        bSizer10.Add(self.text_sync_metric, 1, wx.BOTTOM, 5)
 
         self.stats_sizer.Add(bSizer10, 1, wx.EXPAND, 5)
 
@@ -144,11 +144,11 @@ class SsdrFdvClientFrame (wx.Frame):
         self.mode_selector = wx.Choice(sbSizer6.GetStaticBox(), wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
                                        mode_selectorChoices, 0)
         self.mode_selector.SetSelection(0)
-        bSizer11.Add(self.mode_selector, 0, wx.ALIGN_RIGHT | wx.ALL | wx.EXPAND, 5)
+        bSizer11.Add(self.mode_selector, 0, wx.ALL | wx.EXPAND, 5)
 
         sbSizer6.Add(bSizer11, 1, wx.EXPAND, 5)
 
-        self.main_sizer.Add(sbSizer6, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND, 5)
+        self.main_sizer.Add(sbSizer6, 0, wx.EXPAND, 5)
 
         self.SetSizer(self.main_sizer)
         self.Layout()
